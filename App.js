@@ -1,61 +1,71 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { Image } from 'react-native';
 
-const request = async(Callback) =>{
-    const response = await fetch('http:///swapi.dev/api/people/');
-    const parsed = await response.json();
-    Callback (parsed.results);
+
+// Função para fazer a requisição para a API do Animechan para obter todas as citações
+const fetchData = async (callback) => {
+    try {
+        const response = await fetch('https://animechan.xyz/api/quotes');
+        const data = await response.json();
+        callback(data);
+    } catch (error) {
+        console.error('Erro ao buscar dados da API do Animechan:', error);
+    }
 }
 
 export default function App() {
-    const[registros, setRegistros] = useState([]);
-    useEffect (()=>{
-        request(setRegistros);
-    },[])
+    const [citations, setCitations] = useState([]);
 
+    useEffect(() => {
+        fetchData(setCitations);
+    }, []);
 
-return (
-    <View style={styles.container}>
-        <Text style={styles.titulo}>API do StarWars</Text>
-        <FlatList data={registros} renderItem={({item}) => 
-        <Text style={styles.itens}>
-            <Text>Nome: {item.name}{'\n'}</Text>
-            <Text>Peso: {item.mass} </Text>
-        </Text>  
-        }  />
-        <StatusBar style="auto" />
-    </View>
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Citações de Anime</Text>
+            <FlatList 
+                data={citations} 
+                renderItem={({ item }) => (
+                    <View style={styles.quoteContainer}>
+                        <Text style={styles.character}>Personagem: {item.character}</Text>
+                        <Text style={styles.quote}>Citação: {item.quote}</Text>
+                    </View>
+                )}
+                keyExtractor={(item, index) => index.toString()} 
+            />
+            <StatusBar style="auto" />
+        </View>
     );
-  } 
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection:'column',
-        justifyContent:'space-between',
-        backgroundColor:'#fff',
-        paddingRight:10,
-        paddingLeft:10,
-        paddingTop:25,
-        paddingBottom:25,
+        backgroundColor: '#ff7200',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: 40,
     },
-    itens:{
-        backgroundColor:'#a50800',
-        flex:1,
-        marginBottom:10,
-        marginRight:10,
-        paddingRight:10,
-        paddingLeft:10,
-        paddingTop:10,
-        paddingBottom:10,
-        textAlign:'center',
-        paddingVertical:10,
-        color:'#fff',
-        fontSize:20
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
     },
-    titulo:{
-        fontSize:30,
-        textAlign:'center',
-        marginVertical:40
-    }
+    quoteContainer: {
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        marginBottom: 15,
+        borderRadius: 5,
+    },
+    character: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    quote: {
+        fontSize: 16,
+    },
 });
+
+
